@@ -1,15 +1,15 @@
 ---
 name: "reopen-chat"
-description: "Use when the user asks to reopen, resume, bring back, or open again one or more past chats or sessions, usually by name or title, even when they do not say Claude Code or session. Finds each past Claude Code session by its title and relaunches it in its own new terminal window, from its original folder, as a normal session the user can type into."
+description: "Use when the user asks to reopen, resume, bring back, or open again one or more past chats or sessions, usually by name or title, even when they do not say Claude Code or session. Only for Claude Code CLI sessions, so skip it when the user names any other chat app or website. Finds each past Claude Code CLI session by its title and relaunches it in its own new terminal window, from its original folder, as a normal session the user can type into."
 compatibility: "Windows with Windows Terminal and PowerShell 7."
 metadata:
   author: "Leeor Nahum"
-  version: "1.1.0"
+  version: "1.2.0"
 ---
 
 # Reopen Chat
 
-A chat here is a past Claude Code session, not an artifact or document with a similar name. When the user names another product's chat, this skill does not apply. Reopening one means running `claude --resume <session-id>` in a new Windows Terminal window.
+A chat here is a past Claude Code CLI session, not an artifact or document with a similar name. When the user names any other chat app or website, this skill does not apply. Reopening one means running `claude --resume <session-id>` in a new Windows Terminal window.
 
 ## Find Each Session
 
@@ -23,6 +23,8 @@ A chat here is a past Claude Code session, not an artifact or document with a si
 ## Skip Chats That Are Already Open
 
 Each running Claude Code session registers `~/.claude/sessions/<pid>.json`, whose `sessionId` field names the chat it holds. A chat is open when one of those files names its session ID and the process with that `pid` is still running as `claude`. Files whose process is gone, or whose `pid` now belongs to another program, are stale and mean nothing. Never resume an open chat, since two windows on one transcript split the conversation. Report it as already open.
+
+A helper session never registers there, so also look for a running `claude` process with `--resume <session-id>` on its command line. A match with no registry file is the chat open as a helper of some agent's session, not saving its transcript. Report it as open but not saving, and ask the user before closing it and reopening it clean, since they may be typing in it.
 
 ## Launch Clean
 
@@ -46,4 +48,4 @@ Within a few seconds of a clean launch, a new `~/.claude/sessions/<pid>.json` na
 
 ## Report
 
-One line per chat: its current title, its folder, any other sessions that also matched, and whether it was opened, was already open, was launched but not verified, or was not found.
+One line per chat: its current title, its folder, any other sessions that also matched, and whether it was opened, was already open, was open but not saving, was launched but not verified, or was not found.
