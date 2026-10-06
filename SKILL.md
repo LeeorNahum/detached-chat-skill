@@ -1,15 +1,15 @@
 ---
 name: "detached-chat"
-description: "Use when the user asks to reopen, resume, bring back, or open again one or more past chats or sessions, usually by name or title, even when they do not say Claude Code or session. Also use when work should go to a chat of its own instead of a subagent: work that must keep running after the current session closes, work the user wants to watch or steer in its own window, or a past chat that should pick up new instructions. Only for Claude Code CLI sessions, so skip it when the user names any other chat app or website. Reopens past Claude Code CLI sessions by title, each in its own new terminal window from its original folder, and hands work to a window chat or a background chat that outlives the current session, with a way to watch it and to tell how it ended."
-compatibility: "Claude Code CLI 2.1.257 or later for background chats. Opening a window requires Windows with Windows Terminal and PowerShell 7."
+description: "Use when the user asks to reopen, resume, bring back, or open again one or more past chats, sessions, or threads, usually by name or title, even when they do not say Claude Code, Codex, or session. Also use when work should go to a chat of its own instead of a subagent: work that must keep running after the current session closes, work the user wants to watch or steer in its own window, or a past chat that should pick up new instructions. Only for Claude Code CLI and Codex CLI sessions, so skip it when the user names any other chat app or website. Reopens past Claude Code and Codex CLI sessions by title, each in its own new terminal window from its original folder, and hands work to a Claude Code window chat or background chat that outlives the current session, with a way to watch it and to tell how it ended."
+compatibility: "Claude Code CLI 2.1.257 or later for background chats. Codex CLI 0.160 or later to reopen Codex chats. Opening a window requires Windows with Windows Terminal and PowerShell 7."
 metadata:
   author: "Leeor Nahum"
-  version: "2.0.0"
+  version: "2.1.0"
 ---
 
 # Detached Chat
 
-A chat here is a Claude Code CLI session, not an artifact or document with a similar name. When the user names any other chat app or website, this skill does not apply. A detached chat runs on its own, not as part of the session that started it.
+A chat here is a Claude Code CLI or Codex CLI session, which the user may also call a session or a thread, not an artifact or document with a similar name. When the user names any other chat app or website, this skill does not apply. A detached chat runs on its own, not as part of the session that started it.
 
 | The user wants | Do |
 | --- | --- |
@@ -17,14 +17,18 @@ A chat here is a Claude Code CLI session, not an artifact or document with a sim
 | Work in a chat of its own, new or continued from a past chat | Hand Off Work |
 | To watch or type into a background chat | Open A Window On A Background Chat |
 
+Reopening covers both CLIs, and the sections below give the Claude Code specifics. As soon as Find Each Session shows that a chat is a Codex one, read [Codex chats](references/codex.md) and use its folder, open check, launch arguments, and verification in their place.
+
 ## Find Each Session
 
-- Transcripts live at `~/.claude/projects/<encoded-folder>/<session-id>.jsonl`. The file name is the session ID.
-- Titles are JSON lines with `"type":"custom-title"` (field `customTitle`, set by the user) or `"type":"ai-title"` (field `aiTitle`, generated). A rename appends a new line. The current title is the last custom title, or the last AI title when the chat has no custom title.
+- When the user does not say which CLI the chat belongs to, search the titles of both and let the best match decide. Ask when a Claude Code chat and a Codex chat match equally well.
+- Codex titles are the `thread_name` values in `~/.codex/session_index.jsonl`, one JSON line per naming, each with the chat's session ID in `id`. The last line for an `id` holds its current title.
+- Claude Code transcripts live at `~/.claude/projects/<encoded-folder>/<session-id>.jsonl`. The file name is the session ID.
+- Claude Code titles are JSON lines with `"type":"custom-title"` (field `customTitle`, set by the user) or `"type":"ai-title"` (field `aiTitle`, generated). A rename appends a new line. The current title is the last custom title, or the last AI title when the chat has no custom title.
 - Match on meaning, not exact text. The user may reorder words, drop an emoji or a suffix, or use a shorter name than the title. Search every project folder, since the chat may have started anywhere.
 - Skip the current session. Its ID is in the `CLAUDE_CODE_SESSION_ID` variable of the agent's shell, and its own title often echoes the request.
 - When more than one session fits, take the strongest title match. Break a tie by what the user said about the chat, then by the most recently modified, and name the others on that chat's report line. Ask instead when nothing separates them but the modified time.
-- The working directory is the last `cwd` field in the transcript. Never decode it from the folder name, which turns every separator, space, and dot into a hyphen and cannot be reversed. If that folder no longer exists, ask before launching anywhere else.
+- The working directory of a Claude Code chat is the last `cwd` field in the transcript. Never decode it from the folder name, which turns every separator, space, and dot into a hyphen and cannot be reversed. If that folder no longer exists, ask before launching anywhere else.
 
 ## Skip Chats That Are Already Open
 
@@ -55,6 +59,8 @@ Within a few seconds of a clean launch, a new `~/.claude/sessions/<pid>.json` na
 ## Hand Off Work
 
 A subagent of the current session stays the default for delegated work. Hand work to a chat of its own only when it must keep running after this session closes or is stopped, when the user wants to watch or steer it, or when a past chat should pick up new instructions. `claude -p` is not a chat of its own: `--bg` rejects it, and a `-p` run the agent starts belongs to the agent's shell.
+
+Handing off work is Claude Code only. When the chat that should take the work is a Codex one, say so and offer to reopen it for the user instead.
 
 ### Write The Task File
 
@@ -133,6 +139,6 @@ Ask before `claude stop <short id>` on a chat the user may be typing in. Stoppin
 
 ## Report
 
-One line per reopened chat: its current title, its folder, any other sessions that also matched, and whether it was opened, was already open, was open but not saving, was launched but not verified, or was not found.
+One line per reopened chat: its current title, which CLI it belongs to, its folder, any other sessions that also matched, and whether it was opened, was already open, was open but not saving, was launched but not verified, or was not found.
 
 One line per handed-off chat: its name, where it runs (a window, or the background with its short ID), its folder, the task file, the report file, and whether it was started, was continued, was started as a copy, was already running with the instructions delivered or not, or failed to start and why. For a background chat, add that `claude attach <short id>` opens it. When it ends, add how it ended and where the work is.
