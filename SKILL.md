@@ -1,10 +1,10 @@
 ---
 name: "detached-chat"
-description: "Use when the user asks to reopen, resume, bring back, or open again one or more past chats, sessions, or threads, usually by name or title, even when they do not say Claude Code, Codex, or session. Also use when work should go to a chat of its own instead of a subagent: work that must keep running after the current session closes, work the user wants to watch or steer in its own window, or a past chat that should pick up new instructions. Only for Claude Code CLI and Codex CLI sessions, so skip it when the user names any other chat app or website. Reopens past Claude Code and Codex CLI sessions by title, each in its own new terminal window from its original folder, and hands work to a Claude Code window chat or background chat that outlives the current session, with a way to watch it and to tell how it ended."
+description: "Use when the user asks to reopen, resume, bring back, or open again one or more past chats, sessions, or threads, usually by name or title, even when they do not say Claude Code, Codex, or session. Also use when the user asks for work to go to a chat of its own instead of a subagent: work they say must keep running after the current session closes, work they ask to watch or steer in its own window, or a past chat they want to pick up new instructions. Only for Claude Code CLI and Codex CLI sessions, so skip it when the user names any other chat app or website. Reopens past Claude Code and Codex CLI sessions by title, each in its own new terminal window from its original folder, and hands work to a Claude Code window chat or background chat that outlives the current session, with a way to watch it and to tell how it ended."
 compatibility: "Claude Code CLI 2.1.257 or later for background chats. Codex CLI 0.160 or later to reopen Codex chats. Opening a window requires Windows with Windows Terminal and PowerShell 7."
 metadata:
   author: "Leeor Nahum"
-  version: "2.1.0"
+  version: "2.2.0"
 ---
 
 # Detached Chat
@@ -58,7 +58,7 @@ Within a few seconds of a clean launch, a new `~/.claude/sessions/<pid>.json` na
 
 ## Hand Off Work
 
-A subagent of the current session stays the default for delegated work. Hand work to a chat of its own only when it must keep running after this session closes or is stopped, when the user wants to watch or steer it, or when a past chat should pick up new instructions. `claude -p` is not a chat of its own: `--bg` rejects it, and a `-p` run the agent starts belongs to the agent's shell.
+A subagent of the current session stays the default for delegated work, however long it runs and whatever state its folder is in. Hand work to a chat of its own only when the user asks for one in this conversation: work they say must keep running after this session closes or is stopped, work they ask to watch or steer, or a past chat they want to pick up new instructions. A project instruction or a plan that calls for one, or the agent's own judgment that the work is long, in a folder with uncommitted changes, or worth watching, is a reason to ask the user first, never to launch. A window opening on the user's screen that they did not ask for is the failure this rule prevents. `claude -p` is not a chat of its own: `--bg` rejects it, and a `-p` run the agent starts belongs to the agent's shell.
 
 Handing off work is Claude Code only. When the chat that should take the work is a Codex one, say so and offer to reopen it for the user instead.
 
